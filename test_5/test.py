@@ -1,319 +1,293 @@
 from queue import PriorityQueue
-import argparse
+from argparse import ArgumentParser as parser
 from auxillary import *
 
-'''
-    Function to implement the Breadth First Search algorithm
-'''
-def bfs(start_state, end_state, log_file):
+def breadthFirstSearch(start_state, end_state, log_file=False):
+    """
+    Performs Breadth First Search to find a path from start_state to end_state.
 
-    start_node = Node(start_state)                      # The starting state of the board
-    end_node = Node(end_state)                          # The goal state for the board
-    visited = set()                                     # Set of all nodes that have been visited
-    visited.add(tuple(map(tuple, start_node.state)))    # Keep appending to it
-    fringe = [start_node]                               # Fringe that includes all nodes, visited and unvisited
-    max_fringe_size = 1                                 # default value
-    nodes_popped = 0                                    # default value
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
 
-    # Execute until fringe is empty
-    while len(fringe) > 0:
+    Returns:
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
+    """
+
+    start_node = Node(start_state)                                  # The starting state of the board
+    end_node = Node(end_state)                                      # The goal state for the board
+    visited = set()                                                 # Set of all nodes that have been visited
+    visited.add(tuple(map(tuple, start_node.state)))                # Keep appending to it
+    fringe = [start_node]                                           # Fringe that includes all nodes, visited and unvisited
+    max_fringe_size = 1                                             # default value
+    nodes_popped = 0                                                # default value
+    nodes_expanded = 0                                              # Initialise variables with default values
+    nodes_generated = 1                                             # Initialise variables with default values
+
+    while len(fringe) > 0:                                          # Execute until fringe is empty
         max_fringe_size = max(max_fringe_size, len(fringe))
-        node = fringe.pop(0)                            # Pop from fringe
-        nodes_popped += 1                               # Increment the popped nodes count
+        node = fringe.pop(0)                                        # Pop node from fringe to explore
+        nodes_popped += 1                                           # Increment the popped nodes count
 
-        if node.state == end_node.state:                # Check if the goal has been reached
-            depth, cost, moves = reconstruct_path(node) # Reconstruct path if a goal state has been reached
-            if log_file is True:                        # Log only if requested from command line
-                LOG(visited, fringe, None, "BFS")
-            # return search statistics to calling function
-            return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
-
-        children = get_children(node)                                                   # Get all child nodes for give node
-        nodes_generated, nodes_expanded = explore_children(children, visited, fringe)   # Explore all child nodes
-
-    return None
-
-'''
-    Function to implement the Breadth First Search algorithm
-'''
-def dfs(start_state, end_state, log_file=None):
-
-    start_node = Node(start_state)                      # The starting state of the board
-    end_node = Node(end_state)                          # The goal state for the board
-    visited = set()                                     # Set of all nodes that have been visited
-    visited.add(tuple(map(tuple, start_node.state)))    # Keep appending to it
-    fringe = [start_node]                               # Fringe that includes all nodes, visited and unvisited
-    max_fringe_size = 1                                 # Initialise variables with default values
-    nodes_popped = 0                                    # Initialise variables with default values
-    nodes_expanded = 0                                  # Initialise variables with default values
-    nodes_generated = 1                                 # Initialise variables with default values
-
-    while len(fringe) > 0:                              # Execute until fringe is empty
-        max_fringe_size = max(max_fringe_size, len(fringe))
-        node = fringe.pop()
-        nodes_popped += 1                               # Increment the popped nodes count
-
-        if node.state == end_node.state:                # Check if current state matches the goal state of the board
-            depth, cost, moves = reconstruct_path(node) # Reconstruct path if a goal state has been reached
-            if log_file is True:                        # Log only if requested from command line
-                LOG(visited, fringe, None, "DFS")
+        if node.state == end_node.state:                            # Check if the goal has been reached
+            depth, cost, moves = reconstruct_path(node, "BFS")      # Reconstruct path if a goal state has been reached
+            if log_file is True:                                    # Log only if requested from command line
+                logProgress(visited, fringe, "BFS")
 
             # return search statistics to calling function
             return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
 
-        children = get_children(node)                                                   # Get all child nodes for give node
-        nodes_generated, nodes_expanded = explore_children(children, visited, fringe)   # Explore all child nodes
+        nodes_generated, nodes_expanded = exploreChildren(node, visited, fringe, None, "BFS") # Explore all child nodes
 
     return None
 
-'''
-    Function to perform Iteratively Deepening Search
-'''
-def ids(start_state, end_state, log_file=None):
 
-    start_node = Node(start_state)
-    end_node = Node(end_state)
-    depth_limit = 0
-    max_fringe_size = 1
+def depthFirstSearch(start_state, end_state, log_file=False):
+    """
+    Performs Depth First Search to find a path from start_state to end_state.
+
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
+
+    Returns:
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
+    """
+
+    start_node = Node(start_state)                                  # The starting state of the board
+    end_node = Node(end_state)                                      # The goal state for the board
+    visited = set()                                                 # Set of all nodes that have been visited
+    visited.add(tuple(map(tuple, start_node.state)))                # Keep appending to it
+    fringe = [start_node]                                           # Fringe that includes all nodes, visited and unvisited
+    max_fringe_size = 1                                             # Initialise variables with default values
+    nodes_popped = 0                                                # Initialise variables with default values
+    nodes_expanded = 0                                              # Initialise variables with default values
+    nodes_generated = 1                                             # Initialise variables with default values
+
+    while len(fringe) > 0:                                          # Execute until fringe is empty
+        max_fringe_size = max(max_fringe_size, len(fringe))
+        node = fringe.pop()                                         # Pop node from fringe to explore
+        nodes_popped += 1                                           # Increment the popped nodes count
+
+        if node.state == end_node.state:                            # Check if current state matches the goal state of the board
+            depth, cost, moves = reconstruct_path(node, "DFS")      # Reconstruct path if a goal state has been reached
+            if log_file is True:                                    # Log only if requested from command line
+                logProgress(visited, fringe, "DFS")
+
+            # return search statistics to calling function
+            return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
+
+        nodes_generated, nodes_expanded = exploreChildren(node, visited, fringe, None, "DFS")   # Explore all child nodes
+
+    return None
+
+
+def iterativelyDeepeningSearch(start_state, end_state, log_file=False):
+    """
+    Performs Iterative Deepening Depth-First Search to find a path from start_state to end_state.
+
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
+
+    Returns:
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
+    """
+
+    start_node = Node(start_state)                                  # The starting state of the board
+    end_node = Node(end_state)                                      # The goal state for the board
+    depth_limit = 0                                                 # Initialise with default values
+    max_fringe_size = 1                                             # Initialise with default values
 
     while True:
-        stack = [[start_node]]
-        visited = set()
-        visited.add(tuple(map(tuple, start_node.state)))
-        nodes_popped = 0
-        nodes_expanded = 0
-        nodes_generated = 1
+        fringe = [[start_node]]                                     # Fringe that includes all nodes, visited and unvisited
+        visited = set()                                             # Set of all nodes that have been visited
+        visited.add(tuple(map(tuple, start_node.state)))            # Keep appending to it
+        nodes_popped = 0                                            # Initialise variables with default values
+        nodes_expanded = 0                                          # Initialise variables with default values
+        nodes_generated = 1                                         # Initialise variables with default values
 
-        while stack:
-            current_level = stack[-1]
+        while fringe:                                               # Execute until fringe is empty
+            current_level = fringe[-1]
 
             if not current_level:
-                stack.pop()
+                fringe.pop()                                        # Pop node from fringe to explore
                 continue
 
-            node = current_level.pop()
-            nodes_popped += 1                               # Increment the popped nodes count
+            node = current_level.pop()                              # Pop node from current depth level
+            nodes_popped += 1                                       # Increment count of popped nodes
 
-            if node.state == end_node.state:
-                depth = 0
-                cost = 0
-                moves = []
+            if node.state == end_node.state:                        # Check if current state matches the goal state of the board
+                depth, cost, moves = reconstruct_path(node, "IDS")  # Reconstruct path if a goal state has been reached
 
-                while node.parent is not None:
-                    depth += 1
-                    cost += node.cost
-                    moves.append(node.move)
-                    node = node.parent
-                moves.reverse()
-
-                if log_file is True:                        # Log only if requested from command line
-                    LOG(visited, None, stack, "IDS")
+                if log_file:                                        # Log only if requested from command line
+                    logProgress(visited, fringe, "IDS")
 
                 # return search statistics to calling function
                 return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
 
             if node.depth < depth_limit:
+                nodes_generated, nodes_expanded = exploreChildren(node, visited, fringe, None, "IDS")
 
-                children = get_children(node)
+                if len(fringe[-1]) > max_fringe_size:               # Update max_fringe_size if needed
+                    max_fringe_size = len(fringe[-1])
 
-                for child in children:
-                    if tuple(map(tuple, child.state)) not in visited:
-                        visited.add(tuple(map(tuple, child.state)))
-                        stack.append([child])
-                        nodes_generated += 1
-                nodes_expanded += 1
-
-        depth_limit += 1
+        depth_limit += 1                                            # Increment depth limit
+        if depth_limit > len(start_state) * len(start_state[0]):
+            return None
 
 
-
-def ucs(start_state, end_state, log_file=None):
-    start_node = Node(start_state)
-    end_node = Node(end_state)
-    visited = set()
-    visited.add(tuple(map(tuple, start_node.state)))
-    fringe = PriorityQueue()
-    fringe.put((0, start_node))
-    max_fringe_size = 1
-    nodes_popped = 0
-    nodes_expanded = 0
-    nodes_generated = 1
-    while not fringe.empty():
-        max_fringe_size = max(max_fringe_size, fringe.qsize())
-        node = fringe.get()[1]
-        nodes_popped += 1                               # Increment the popped nodes count
-        if node.state == end_node.state:
-            depth = 0
-            cost = 0
-            moves = []
-            while node.parent is not None:
-                depth += 1
-                cost += node.cost
-                moves.append(node.move)
-                node = node.parent
-            moves.reverse()
-
-            if log_file is not None:
-
-                with open(log_file, 'w') as f:
-                    f.write('Closed nodes:\n')
-
-                    for n in visited:
-                        f.write(str(n)+'\n')
-
-                    f.write('Fringes:\n')
-
-                    for n in list(fringe.queue):
-                        f.write(str(n[1].state)+'\n')
-
-            if log_file is True:                        # Log only if requested from command line
-                LOG(visited, fringe, None, "DFS")
-
-            return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
-
-        children = get_children(node)
-        for child in children:
-            if tuple(map(tuple, child.state)) not in visited:
-                visited.add(tuple(map(tuple, child.state)))
-                fringe.put((child.cost, child))
-                nodes_generated += 1
-        nodes_expanded += 1
-    return None
-
-
-# def manhattan_distance(state, goal_state):
-#     distance = 0
-#     for i in range(3):
-#         for j in range(3):
-#             if state[i][j] != 0:
-#                 row, col = divmod(goal_state.index(state[i][j]), 3)
-#                 distance += abs(row - i) + abs(col - j)
-#     return distance
-
-def manhattan_distance(state, goal_state):
+def uniformCostSearch(start_state, end_state, log_file=False):
     """
-    Calculates the Manhattan distance heuristic for the 8-puzzle problem.
+    Performs Uniform Cost Search to find a path from start_state to end_state.
 
-    Parameters:
-        state (list of lists): The current state of the board.
-        goal_state (list of lists): The goal state of the board.
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
 
     Returns:
-        The Manhattan distance heuristic as an integer.
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
     """
-    distance = 0
-    for i in range(3):
-        for j in range(3):
-            if state[i][j] == 0:
-                continue
-            row, col = divmod(goal_state.index(state[i][j]), 3)
-            distance += abs(i - row) + abs(j - col)
-    return distance
+    start_node = Node(start_state)                                  # The starting state of the board
+    end_node = Node(end_state)                                      # The goal state for the board
+    visited = set()                                                 # Set of all nodes that have been visited
+    visited.add(tuple(map(tuple, start_node.state)))                # Keep appending to it
+    fringe = PriorityQueue()                                        # Fringe that includes all nodes, visited and unvisited
 
+    cost = 0                                                        # Calculate cost
 
-def gfs(start_state, end_state, heuristic, log_file=None):
-    start_node = Node(start_state)
-    end_node = Node(end_state)
-    visited = set()
-    visited.add(tuple(map(tuple, start_node.state)))
-    fringe = PriorityQueue()
-    fringe.put((heuristic(start_node.state, end_state), start_node))
-    max_fringe_size = 1
-    nodes_popped = 0
-    nodes_expanded = 0
-    nodes_generated = 1
-    while not fringe.empty():
+    fringe.put((cost, start_node))                                  # Append to fringe in order of cost
+
+    max_fringe_size = 1                                             # Initialise variables with default values
+    nodes_popped = 0                                                # Initialise variables with default values
+    nodes_expanded =  0                                             # Initialise variables with default values
+    nodes_generated = 1                                             # Initialise variables with default values
+
+    while not fringe.empty():                                       # Execute until fringe is empty
         max_fringe_size = max(max_fringe_size, fringe.qsize())
-        node = fringe.get()[1]
-        nodes_popped += 1                               # Increment the popped nodes count
-        if node.state == end_node.state:
-            depth = 0
-            cost = 0
-            moves = []
-            while node.parent is not None:
-                depth += 1
-                cost += node.cost
-                moves.append(node.move)
-                node = node.parent
-            moves.reverse()
+        node = fringe.get()[1]                                      # Pop node from fringe
+        nodes_popped += 1                                           # Increment the popped nodes count
 
-            if log_file is not None:
-                with open(log_file, 'w') as f:
-                    f.write('Closed nodes:\n')
-                    for n in visited:
-                        f.write(str(n)+'\n')
+        if node.state == end_node.state:                            # Reconstruct path if a goal state has been reached
+            depth, cost, moves = reconstruct_path(node, "DFS")
 
-                    f.write('Fringes:\n')
-                    for n in list(fringe.queue):
-                        f.write(str(n[1].state)+'\n')
+            if log_file is True:                                    # Log only if requested from command line
+                logProgress(visited, fringe, "UCS")
+
+            return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
+
+        nodes_generated, nodes_expanded = exploreChildren(node, visited, fringe, None, "UCS")     # Explore all child nodes
+    return None
+
+
+def greedyFirstSearch(start_state, end_state, log_file=False):
+    """
+    Performs Greedy First Search to find a path from start_state to end_state.
+
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
+
+    Returns:
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
+    """
+    start_node = Node(start_state)                                      # The starting state of the board
+    end_node = Node(end_state)                                          # The goal state for the board
+    visited = set()                                                     # Set of all nodes that have been visited
+    visited.add(tuple(map(tuple, start_node.state)))                    # Keep appending to it
+    fringe = PriorityQueue()                                            # Fringe that includes all nodes, visited and unvisited
+
+    heuristic = manhattan_distance(start_state, end_state)              # Calculate the manhattan distance
+
+    fringe.put((heuristic, start_node))                                 # Append to fringe in order of heuristic value
+
+    max_fringe_size = 1                                                 # Initialise variables with default values
+    nodes_popped = 0                                                    # Initialise variables with default values
+    nodes_expanded = 0                                                  # Initialise variables with default values
+    nodes_generated = 1                                                 # Initialise variables with default values
+
+    while not fringe.empty():                                           # Execute until fringe is empty
+        max_fringe_size = max(max_fringe_size, fringe.qsize())
+        node = fringe.get()[1]                                          # Pop node from fringe to explore
+        nodes_popped += 1                                               # Increment the popped nodes count
+
+        if node.state == end_node.state:                                # Reconstruct path if a goal state has been reached
+            depth, cost, moves = reconstruct_path(node, "GFS")
+
+            if log_file is True:                                        # Log only if requested from command line
+                logProgress(visited, fringe, "GFS")
 
             # return search statistics to calling function
             return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
 
-        children = get_children(node)
-        for child in children:
-            if tuple(map(tuple, child.state)) not in visited:
-                visited.add(tuple(map(tuple, child.state)))
-                fringe.put((heuristic(child.state, end_state), child))
-                nodes_generated += 1
-        nodes_expanded += 1
+        nodes_generated, nodes_expanded = exploreChildren(node, visited, fringe, end_state, "GFS")      # Explore all child nodes
     return None
 
 
-def astar(start_state, end_state, heuristic_function, log_file=None):
-    start_node = Node(start_state)
-    end_node = Node(end_state)
-    visited = set()
-    visited.add(tuple(map(tuple, start_node.state)))
-    fringe = PriorityQueue()
-    fringe.put((0, start_node))
-    max_fringe_size = 1
-    nodes_popped = 0
-    nodes_expanded = 0
-    nodes_generated = 1
+def aStarSearch(start_state, end_state, log_file=None):
+    """
+    Performs Uniform Cost Search to find a path from start_state to end_state.
+
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
+
+    Returns:
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
+    """
+    start_node = Node(start_state)                                      # The starting state of the board
+    end_node = Node(end_state)                                          # The goal state for the board
+    visited = set()                                                     # Set of all nodes that have been visited
+    visited.add(tuple(map(tuple, start_node.state)))                    # Keep appending to it
+    fringe = PriorityQueue()                                            # Fringe that includes all nodes, visited and unvisited
+
+    heuristic = manhattan_distance(start_state, end_state)              # Calculate the manhattan distance
+    cost = heuristic + 0                                                # Calculate cost
+
+    fringe.put((cost, start_node))                                      # Insert into fringe in order of cost
+
+    max_fringe_size = 1                                                 # Initialise variables with default values
+    nodes_popped = 0                                                    # Initialise variables with default values
+    nodes_expanded = 0                                                  # Initialise variables with default values
+    nodes_generated = 1                                                 # Initialise variables with default values
+
     while not fringe.empty():
         max_fringe_size = max(max_fringe_size, fringe.qsize())
         node = fringe.get()[1]
-        nodes_popped += 1                               # Increment the popped nodes count
-        if node.state == end_node.state:
-            depth = 0
-            cost = 0
-            moves = []
-            while node.parent is not None:
-                depth += 1
-                cost += node.cost
-                moves.append(node.move)
-                node = node.parent
-            moves.reverse()
+        nodes_popped += 1                                               # Increment the popped nodes count
 
-            if log_file is not None:
+        if node.state == end_node.state:                                # Reconstruct path if a goal state has been reached
+            depth, cost, moves = reconstruct_path(node, "ASS")
 
-                with open(log_file, 'w') as f:
-                    f.write('Closed nodes:\n')
-
-                    for n in visited:
-                        f.write(str(n)+'\n')
-
-                    f.write('Fringes:\n')
-
-                    for n in list(fringe.queue):
-                        f.write(str(n[1].state)+'\n')
+            if log_file is True:                                        # Log only if requested from command line
+                logProgress(visited, fringe, "ASS")
 
             # return search statistics to calling function
             return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
 
-        children = get_children(node)
-        for child in children:
-            if tuple(map(tuple, child.state)) not in visited:
-                visited.add(tuple(map(tuple, child.state)))
-                cost = child.cost + heuristic_function(child.state, end_state)
-                fringe.put((cost, child))
-                nodes_generated += 1
-        nodes_expanded += 1
+        nodes_generated, nodes_expanded = exploreChildren(node, visited, fringe, end_state, "ASS")      # Explore all child nodes
+
     return None
 
 
-def dls(start_state, end_state, max_depth, log_file=None):
+def depth_limited_search(start_state, end_state, max_depth, log_file=None):
+    """
+    Performs Uniform Cost Search to find a path from start_state to end_state.
+
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
+
+    Returns:
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
+    """
     start_node = Node(start_state)
     end_node = Node(end_state)
     stack = [[start_node]]
@@ -350,7 +324,7 @@ def dls(start_state, end_state, max_depth, log_file=None):
             return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
 
         if len(path) <= max_depth:
-            children = get_children(node)
+            children = getChildren(node)
             nodes_expanded += 1
             for child in children:
                 if tuple(map(tuple, child.state)) not in visited:
@@ -364,10 +338,10 @@ def dls(start_state, end_state, max_depth, log_file=None):
 
 
 # Practically the main function that invokes the right algorithm from from cli parameters
-parser = argparse.ArgumentParser()
-parser.add_argument('start', help='start state file')
-parser.add_argument('end', help='end state file')
-parser.add_argument('algorithm', help='Algorithm to use | '
+cli = parser()
+cli.add_argument('start', help='start state file')
+cli.add_argument('end', help='end state file')
+cli.add_argument('algorithm', help='Algorithm to use | '
                     'BFS = Breadth First Search | '
                     'DFS = Depth First Search | '
                     'DLS = Depth Limited Search | '
@@ -376,36 +350,37 @@ parser.add_argument('algorithm', help='Algorithm to use | '
                     'GFS = Greedy first Search | '
                     'ASS = A* Search')
 
-parser.add_argument('log', help='Log to file | l=log nl=no log')
-args = parser.parse_args()
+cli.add_argument('log', help='Log to file | l=log nl=no log')
+cli_args = cli.parse_args()
 
-algorithm = args.algorithm
-
-if (args.log) == 'l':
+if (cli_args.log) == 'l':
     log = True
 else:
     log = False
 
-start_state = load_state(args.start)
-end_state = load_state(args.end)
+start_state = readBoard(cli_args.start)
+end_state = readBoard(cli_args.end)
 
-if (algorithm == 'BFS'):
-    result = bfs(start_state, end_state, log)
-elif (algorithm == 'DFS'):
-    result = dfs(start_state, end_state, log)
-elif (algorithm == 'DLS'):
-    result = dls(start_state, end_state, log)
-elif (algorithm == 'IDS'):
-    result = ids(start_state, end_state, log)
-elif (algorithm == 'UCS'):
-    heuristic_manhattan = manhattan_distance(start_state, end_state)
-    result = ucs(start_state, end_state, log)
-elif (algorithm == 'GFS'):
-    heuristic_manhattan = manhattan_distance(start_state, end_state)
-    result = gfs(start_state, end_state, log)
-elif (algorithm == 'ASS'):
-    heuristic_manhattan = manhattan_distance(start_state, end_state)
-    result = astar(start_state, end_state, heuristic_manhattan, log)
+if (cli_args.algorithm == 'BFS'):
+    result = breadthFirstSearch(start_state, end_state, log)
+
+elif (cli_args.algorithm == 'DFS'):
+    result = depthFirstSearch(start_state, end_state, log)
+
+elif (cli_args.algorithm == 'DLS'):
+    result = depth_limited_search(start_state, end_state, log)
+
+elif (cli_args.algorithm == 'IDS'):
+    result = iterativelyDeepeningSearch(start_state, end_state, log)
+
+elif (cli_args.algorithm == 'UCS'):
+    result = uniformCostSearch(start_state, end_state, log)
+
+elif (cli_args.algorithm == 'GFS'):
+    result = greedyFirstSearch(start_state, end_state, log)
+
+elif (cli_args.algorithm == 'ASS'):
+    result = aStarSearch(start_state, end_state, log)
 
 if result is None:
     print('No solution found!')
