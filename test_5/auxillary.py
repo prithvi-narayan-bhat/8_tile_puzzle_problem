@@ -44,10 +44,16 @@ def saveState(file, state):
             f.write(line+'\n')
 
 
-'''
-    Function to get the position of the blank tile
-'''
 def getBlankPosition(state):
+    """
+    Returns the position of the blank tile (represented by 0) in the given state.
+
+    Args:
+        state (list): A 2D list representing the state of the puzzle.
+
+    Returns:
+        A tuple representing the row and column of the blank tile.
+    """
     for i in range(3):
         for j in range(3):
             if state[i][j] == 0:                        # Blank tile is represented by 0
@@ -72,7 +78,7 @@ def logProgress(visited, fringe, algorithm):
             for n in fringe:
                 f.write(str(n.state)+'\n')
 
-        elif algorithm == 'IDS':
+        elif algorithm == 'IDS' or algorithm == 'DLS':
             for level in fringe:
                 for n in level:
                     f.write(str(n.state)+'\n')
@@ -130,7 +136,7 @@ def exploreChildren(node, visited, fringe, end_state, algorithm):
         if tuple(map(tuple, child.state)) not in visited:   # Explore only unvisited nodes and ignore the visited ones
             visited.add(tuple(map(tuple, child.state)))
 
-            if algorithm == "IDS":
+            if algorithm == "IDS" or algorithm == "DLS":
                 fringe[-1].append(child)                    # Insert into fringe
 
             elif algorithm == "UCS":
@@ -166,7 +172,7 @@ def reconstruct_path(node, algorithm):
         depth += 1                                          # Update values
         if algorithm == 'BFS' or algorithm == 'DFS':
             cost += 1                                       # Update values
-        elif algorithm == 'IDS' or algorithm == 'UCS' or algorithm == 'GFS' or algorithm == 'ASS':
+        elif algorithm == 'IDS' or algorithm == 'UCS' or algorithm == 'GFS' or algorithm == 'ASS' or algorithm == 'DLS':
             cost += node.cost                               # Update cost
         moves.append(node.move)                             # Update values
         node = node.parent

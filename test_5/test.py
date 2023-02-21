@@ -276,7 +276,63 @@ def aStarSearch(start_state, end_state, log_file=None):
     return None
 
 
-def depth_limited_search(start_state, end_state, max_depth, log_file=None):
+def depthLimitedSearch(start_state, end_state,depth_limit, log_file=False):
+    """
+    Performs Depth Limited Search to find a path from start_state to end_state.
+
+    Args:
+        start_state (list): The initial state.
+        end_state (list): The goal state.
+        log_file (bool): If True, log the search process to a file.
+
+    Returns:
+        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
+    """
+    start_node = Node(start_state)                                  # The starting state of the board
+    end_node = Node(end_state)                                      # The goal state for the board
+    max_fringe_size = 1                                             # Initialise with default values
+
+    while True:
+        fringe = [[start_node]]                                     # Fringe that includes all nodes, visited and unvisited
+        visited = set()                                             # Set of all nodes that have been visited
+        visited.add(tuple(map(tuple, start_node.state)))            # Keep appending to it
+        nodes_popped = 0                                            # Initialise variables with default values
+        nodes_expanded = 0                                          # Initialise variables with default values
+        nodes_generated = 1                                         # Initialise variables with default values
+
+        while fringe:                                               # Execute until fringe is empty
+            current_level = fringe[-1]
+
+            if not current_level:
+                fringe.pop()                                        # Pop node from fringe to explore
+                continue
+
+            node = current_level.pop()                              # Pop node from current depth level
+            nodes_popped += 1                                       # Increment count of popped nodes
+
+            if node.state == end_node.state:                        # Check if current state matches the goal state of the board
+                depth, cost, moves = reconstruct_path(node, "DLS")  # Reconstruct path if a goal state has been reached
+                if (depth < depth_limit):
+
+                    if log_file:                                    # Log only if requested from command line
+                        logProgress(visited, fringe, "DLS")
+
+                    # return search statistics to calling function
+                    return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
+                else:
+                    print("Reached maximum permitted depth")
+                    return None
+
+            if node.depth < depth_limit:
+                nodes_generated, nodes_expanded = exploreChildren(node, visited, fringe, None, "DLS")
+
+                if len(fringe[-1]) > max_fringe_size:               # Update max_fringe_size if needed
+                    max_fringe_size = len(fringe[-1])
+
+        if depth > depth_limit:
+            return None
+
+def v(start_state, end_state, max_depth, log_file=False):
     """
     Performs Uniform Cost Search to find a path from start_state to end_state.
 
@@ -288,51 +344,52 @@ def depth_limited_search(start_state, end_state, max_depth, log_file=None):
     Returns:
         A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
     """
-    start_node = Node(start_state)
-    end_node = Node(end_state)
-    stack = [[start_node]]
-    visited = set()
-    visited.add(tuple(map(tuple, start_node.state)))
-    max_fringe_size = 1
-    nodes_popped = 0
-    nodes_expanded = 0
-    nodes_generated = 1
-    while stack:
-        print(f'Nodes Popped: {nodes_popped}')
-        print(f'Nodes Expanded: {nodes_expanded}')
-        print(f'Nodes Generated: {nodes_generated}')
-        print(f'Max Fringe Size: {max_fringe_size}')
-        max_fringe_size = max(max_fringe_size, len(stack))
-        path = stack[-1]
+    start_node = Node(start_state)                              # The starting state of the board
+    end_node = Node(end_state)                                  # The goal state for the board
+    fringe = [[start_node]]                                     # Fringe that includes all nodes, visited and unvisited
+    visited = set()                                             # Set of all nodes that have been visited
+    visited.add(tuple(map(tuple, start_node.state)))            # Keep adding to it
+
+    max_fringe_size = 1                                         # Initialise variables with default values
+    nodes_popped = 0                                            # Initialise variables with default values
+    nodes_expanded = 0                                          # Initialise variables with default values
+    nodes_generated = 1                                         # Initialise variables with default values
+
+    while fringe:                                               # Execute until fringe is empty
+
+        max_fringe_size = max(max_fringe_size, len(fringe))
+        path = fringe[-1]
         node = path[-1]
-        nodes_popped += 1                               # Increment the popped nodes count
+        nodes_popped += 1                                       # Increment the popped nodes count
+        depth = len(path) - 1
+        print(depth)
+
         if node.state == end_node.state:
-            depth = len(path) - 1
+            # depth = len(path) - 1
+
             cost = 0
             moves = []
             for i in range(1, len(path)):
                 cost += path[i].cost
-                moves.append(path[i].move)
+                moves.append(node.move)                             # Update values
 
-            if log_file is not None:
-                with open(log_file, 'w') as f:
-                    f.write('Closed nodes:\n')
-                    for n in visited:
-                        f.write(str(n)+'\n')
+            if log_file is True:
+                logProgress(visited, fringe, "DLS")
 
             # return search statistics to calling function
             return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
 
-        if len(path) <= max_depth:
+        if depth <= max_depth:
+            # print(depth)
             children = getChildren(node)
             nodes_expanded += 1
             for child in children:
                 if tuple(map(tuple, child.state)) not in visited:
                     visited.add(tuple(map(tuple, child.state)))
-                    stack.append(path + [child])
+                    fringe.append(path + [child])
                     nodes_generated += 1
         else:
-            stack.pop()
+            fringe.pop()
 
     return None
 
@@ -368,7 +425,8 @@ elif (cli_args.algorithm == 'DFS'):
     result = depthFirstSearch(start_state, end_state, log)
 
 elif (cli_args.algorithm == 'DLS'):
-    result = depth_limited_search(start_state, end_state, log)
+    depth = int(input("Enter depth limit: "))
+    result = depthLimitedSearch(start_state, end_state, depth, log)
 
 elif (cli_args.algorithm == 'IDS'):
     result = iterativelyDeepeningSearch(start_state, end_state, log)
