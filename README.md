@@ -51,9 +51,9 @@ Acceptable algorithms parameters are the following
 2. DFS -> Depth First Search
 3. IDS -> Iteratively Deepening Search
 4. UCS -> Uniform Cost Search
-5. GFS-> Greedy First Search
-6. ASS-> A* Search
-7. DLS-> Depth Limited Search (will receive a second prompt for the maximum permissable depth (Integer value))
+5. GFS -> Greedy First Search
+6. ASS -> A* Search
+7. DLS -> Depth Limited Search (will receive a second prompt for the maximum permissable depth (Integer value))
 
 ##### NOTE: At any given time only one algorithm may be implemented
 
