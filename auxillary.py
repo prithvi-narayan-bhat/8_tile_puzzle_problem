@@ -2,10 +2,10 @@
 
 from queue import PriorityQueue
 
-'''
-    A class to represent a node in the search graph
-'''
 class Node:
+    '''
+    A class to represent a node in the search graph
+    '''
     def __init__(self, state, parent=None, move=None, depth=0, cost=0):
         self.state = state
         self.parent = parent
@@ -18,10 +18,10 @@ class Node:
 
 
 
-'''
-    Function to read board state from the given input file
-'''
 def readBoard(file):
+    '''
+    Function to read board state from the given input file
+    '''
     with open(file, 'r') as f:
         lines = f.readlines()
     state = []                                          # Initialise a list
@@ -34,10 +34,10 @@ def readBoard(file):
     return state
 
 
-'''
-    Function to reorganize the state of the board in a more meaningful way
-'''
 def saveState(file, state):
+    '''
+    Function to reorganize the state of the board in a more meaningful way
+    '''
     with open(file, 'w') as f:
         for row in state:
             line = ' '.join([str(i) for i in row])
@@ -60,12 +60,12 @@ def getBlankPosition(state):
                 return i, j                             # Return position of blank tile
 
 
-'''
+def logProgress(visited, fringe, algorithm):
+    '''
     Function to Log the progress
     Different algorithms require different parameters to be logged
     Therefore the if-elif-else case
-'''
-def logProgress(visited, fringe, algorithm):
+    '''
     with open("log_file.txt", 'w') as f:
         f.write('Closed nodes:\n')
 
@@ -88,12 +88,12 @@ def logProgress(visited, fringe, algorithm):
                 f.write(str(n[1].state)+'\n')
 
 
-'''
+def getChildren(node):
+    '''
     Function to get the child nodes of each node
     Generates child nodes by swapping the blank tile with the tiles above, below, to the left, and to the right of the blank tile, respectively
     Each swap generates a new state for the puzzle, represented by child_state
-'''
-def getChildren(node):
+    '''
     children = []
     state = node.state
     # Get the position of the blank tile
@@ -121,10 +121,10 @@ def getChildren(node):
         children.append(Node(child_state, node, 'Right'))
     return children
 
-'''
-    Function to explore child nodes of given node
-'''
 def exploreChildren(node, visited, fringe, end_state, algorithm):
+    '''
+    Function to explore child nodes of given node
+    '''
 
     nodes_expanded = 0                                      # default value
     nodes_generated = 1                                     # default value
@@ -159,10 +159,10 @@ def exploreChildren(node, visited, fringe, end_state, algorithm):
 
     return nodes_generated, nodes_expanded
 
-'''
-    Function to reconstruct the path taken to arrive at the present state
-'''
 def reconstruct_path(node, algorithm):
+    '''
+    Function to reconstruct the path taken to arrive at the present state
+    '''
 
     depth = 0                                               # Initialise values
     cost = 0                                                # Initialise values

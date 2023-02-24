@@ -1,11 +1,11 @@
 # 8_tile_puzzle_problem
-An attempt to build an agent to solve a modified version of the 8 puzzle problem
+An attempt to build an agent to solve a modified version of the 8 puzzle problem.
 
-## Author
-* Prithvi Bhat | 1002033598
-* +1(682)340-1126
-* pnb3598@mavs.uta.edu
+This code code is available on Github at the following link
+#### https://github.com/prithvi-narayan-bhat/8_tile_puzzle_problem
 
+To clone the repository, enter the follwoing command on a Git supported machine
+#### git clone git@github.com:prithvi-narayan-bhat/8_tile_puzzle_problem.git
 
 ## Algorithms implemented
 1. Breadth First Search
@@ -62,3 +62,4 @@ Flag to either log the progress into a file or not
 Acceptable values
 1. l -> log = True
 2. nl -> log = False
+

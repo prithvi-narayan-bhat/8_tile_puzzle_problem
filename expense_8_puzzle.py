@@ -332,67 +332,6 @@ def depthLimitedSearch(start_state, end_state,depth_limit, log_file=False):
         if depth > depth_limit:
             return None
 
-def v(start_state, end_state, max_depth, log_file=False):
-    """
-    Performs Uniform Cost Search to find a path from start_state to end_state.
-
-    Args:
-        start_state (list): The initial state.
-        end_state (list): The goal state.
-        log_file (bool): If True, log the search process to a file.
-
-    Returns:
-        A tuple of search statistics and the path from start_state to end_state, or None if no path is found.
-    """
-    start_node = Node(start_state)                              # The starting state of the board
-    end_node = Node(end_state)                                  # The goal state for the board
-    fringe = [[start_node]]                                     # Fringe that includes all nodes, visited and unvisited
-    visited = set()                                             # Set of all nodes that have been visited
-    visited.add(tuple(map(tuple, start_node.state)))            # Keep adding to it
-
-    max_fringe_size = 1                                         # Initialise variables with default values
-    nodes_popped = 0                                            # Initialise variables with default values
-    nodes_expanded = 0                                          # Initialise variables with default values
-    nodes_generated = 1                                         # Initialise variables with default values
-
-    while fringe:                                               # Execute until fringe is empty
-
-        max_fringe_size = max(max_fringe_size, len(fringe))
-        path = fringe[-1]
-        node = path[-1]
-        nodes_popped += 1                                       # Increment the popped nodes count
-        depth = len(path) - 1
-        print(depth)
-
-        if node.state == end_node.state:
-            # depth = len(path) - 1
-
-            cost = 0
-            moves = []
-            for i in range(1, len(path)):
-                cost += path[i].cost
-                moves.append(node.move)                             # Update values
-
-            if log_file is True:
-                logProgress(visited, fringe, "DLS")
-
-            # return search statistics to calling function
-            return depth, cost, moves, nodes_popped, nodes_expanded, nodes_generated, max_fringe_size
-
-        if depth <= max_depth:
-            # print(depth)
-            children = getChildren(node)
-            nodes_expanded += 1
-            for child in children:
-                if tuple(map(tuple, child.state)) not in visited:
-                    visited.add(tuple(map(tuple, child.state)))
-                    fringe.append(path + [child])
-                    nodes_generated += 1
-        else:
-            fringe.pop()
-
-    return None
-
 
 # Practically the main function that invokes the right algorithm from from cli parameters
 cli = parser()
